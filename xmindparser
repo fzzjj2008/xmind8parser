@@ -16,6 +16,10 @@ from dicttoxml import dicttoxml
 from xml.dom.minidom import parseString
 
 
+TOPIC_KEY = "name"
+CHILD_KEY = "children"
+
+
 class ParserBase(ABC):
     """
     Parser Base Class
@@ -33,18 +37,39 @@ class ParserBase(ABC):
     @classmethod
     def getData(cls, topic):
         item = {}
-        item["name"] = topic.getTitle()
+        item[TOPIC_KEY] = topic.getTitle()
         children = []
         for sub_topic in topic.getSubTopics():
             children.append(cls.getData(sub_topic))
         if children:
-            item["children"] = children
+            item[CHILD_KEY] = children
         return item
 
     @abstractmethod
     def parse(self):
         raise NotImplementedError
 
+
+class SimpleParser(ParserBase):
+    """
+    Parse xmind document
+    """
+    @classmethod
+    def printDict(cls, data, layer):
+        for key, val in data.items():
+            if key == TOPIC_KEY:
+                line = "  " * layer + val
+                print(line)
+            elif key == CHILD_KEY:
+                for d in val:
+                    layer += 1
+                    cls.printDict(d, layer)
+                    layer -= 1
+
+    def parse(self):
+        root_topic = self.getRootTopic()
+        data = self.getData(root_topic)
+        self.printDict(data, 0)
 
 class JsonParser(ParserBase):
     """
@@ -86,6 +111,7 @@ class YamlParser(ParserBase):
 
 def xmindparse(filename, format, pretty):
     parser = {
+        "simple": SimpleParser,
         "json": JsonParser,
         "xml": XmlParser,
         "yaml": YamlParser,
@@ -101,12 +127,13 @@ if __name__ == '__main__':
         xmind document parser tool
 
         Examples:
-          xmindparser [-f json] test.xmind         print test.xmind in json format
+          xmindparser test.xmind                   print test.xmind
+          xmindparser -f json test.xmind           print test.xmind in json format
           xmindparser -f xml test.xmind --pretty   pretty print test.xmind in xml format
           xmindparser -f yaml test.xmind           print test.xmind in yaml format"""))
 
-    PARSER.add_argument('-f', '--format', nargs='?', default='json',
-                        choices=['json', 'xml', 'yaml'],
+    PARSER.add_argument('-f', '--format', nargs='?', default='simple',
+                        choices=['simple', 'json', 'xml', 'yaml'],
                         help='document parse format')
     PARSER.add_argument('--pretty', action = "store_true",
                         help='print the result pretty')
@@ -115,6 +142,10 @@ if __name__ == '__main__':
 
     sys.argv.pop(0)
     ARGS = vars(PARSER.parse_args(sys.argv))
+    
+    if not ARGS.get('filename').endswith(".xmind"):
+        print("Input file does not end with xmind")
+        exit(1)
 
     xmindparse(filename=ARGS.get('filename'),
                format=ARGS.get('format'),

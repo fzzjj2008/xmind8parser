@@ -14,10 +14,24 @@ pip3 install pyyaml
 
 ![test.png](test.png)
 
+- print `test.xmind`
+
+```
+# ./xmindparser test.xmind
+
+Title
+  topic 1
+    subtopic 1
+    subtopic 2
+  topic 2
+    subtopic 1
+    subtopic 2
+```
+
 - print `test.xmind` in `json` format
 
 ```
-# xmindparser test.xmind --pretty
+# ./xmindparser -f json test.xmind --pretty
 
 {
   "name": "Title",
@@ -51,7 +65,7 @@ pip3 install pyyaml
 - pretty print `test.xmind` in `xml` format
 
 ```
-# xmindparser -f xml test.xmind --pretty
+# ./xmindparser -f xml test.xmind --pretty
 
 <?xml version="1.0" ?>
 <root>
@@ -86,7 +100,7 @@ pip3 install pyyaml
 - print `test.xmind` in `yaml` format
 
 ```
-# xmindparser -f yaml test.xmind --pretty
+# ./xmindparser -f yaml test.xmind --pretty
 
 name: Title
 children:
