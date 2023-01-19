@@ -16,7 +16,7 @@ pip3 install pyyaml
 
 - print `test.xmind` in `json` format
 
-```json
+```
 # xmindparser test.xmind --pretty
 
 {
@@ -50,7 +50,7 @@ pip3 install pyyaml
 
 - pretty print `test.xmind` in `xml` format
 
-```xml
+```
 # xmindparser -f xml test.xmind --pretty
 
 <?xml version="1.0" ?>
@@ -85,7 +85,7 @@ pip3 install pyyaml
 
 - print `test.xmind` in `yaml` format
 
-```yaml
+```
 # xmindparser -f yaml test.xmind --pretty
 
 name: Title
