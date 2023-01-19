@@ -1,0 +1,122 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Create on: 2023/01/19 12:30:26
+# Author   : fzzjj2008
+"""
+xmind document parser tool
+"""
+from abc import ABC, abstractmethod
+import sys
+import argparse
+import textwrap
+import xmind
+import json
+import yaml
+from dicttoxml import dicttoxml
+from xml.dom.minidom import parseString
+
+
+class ParserBase(ABC):
+    """
+    Parser Base Class
+    """
+    def __init__(self, filename, pretty):
+        self.filename = filename
+        self.pretty = pretty
+        self.data = dict()
+
+    def getRootTopic(self):
+        document = xmind.load(self.filename)
+        sheet = document.getPrimarySheet()
+        return sheet.getRootTopic()
+
+    @classmethod
+    def getData(cls, topic):
+        item = {}
+        item["name"] = topic.getTitle()
+        children = []
+        for sub_topic in topic.getSubTopics():
+            children.append(cls.getData(sub_topic))
+        if children:
+            item["children"] = children
+        return item
+
+    @abstractmethod
+    def parse(self):
+        raise NotImplementedError
+
+
+class JsonParser(ParserBase):
+    """
+    Parse xmind document in json format
+    """
+    def parse(self):
+        root_topic = self.getRootTopic()
+        data = self.getData(root_topic)
+        if self.pretty:
+            print(json.dumps(data, indent=2))
+        else:
+            print(json.dumps(data, separators=(',',':')))
+
+
+class XmlParser(ParserBase):
+    """
+    Parse xmind document in xml format
+    """
+    def parse(self):
+        root_topic = self.getRootTopic()
+        data = self.getData(root_topic)
+        xml = dicttoxml(data)
+        if self.pretty:
+            dom = parseString(xml)
+            print(dom.toprettyxml('  '))
+        else:
+            print(xml.decode())
+
+
+class YamlParser(ParserBase):
+    """
+    Parse xmind document in yaml format
+    """
+    def parse(self):
+        root_topic = self.getRootTopic()
+        data = self.getData(root_topic)
+        print(yaml.dump(data, sort_keys=False))
+
+
+def xmindparse(filename, format, pretty):
+    parser = {
+        "json": JsonParser,
+        "xml": XmlParser,
+        "yaml": YamlParser,
+    }
+    parser_clazz = parser[format](filename, pretty)
+    return parser_clazz.parse()
+
+
+if __name__ == '__main__':
+    PARSER = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=textwrap.dedent("""\
+        xmind document parser tool
+
+        Examples:
+          xmindparser [-f json] test.xmind         print test.xmind in json format
+          xmindparser -f xml test.xmind --pretty   pretty print test.xmind in xml format
+          xmindparser -f yaml test.xmind           print test.xmind in yaml format"""))
+
+    PARSER.add_argument('-f', '--format', nargs='?', default='json',
+                        choices=['json', 'xml', 'yaml'],
+                        help='document parse format')
+    PARSER.add_argument('--pretty', action = "store_true",
+                        help='print the result pretty')
+    PARSER.add_argument('filename',
+                        help='xmind document name')
+
+    sys.argv.pop(0)
+    ARGS = vars(PARSER.parse_args(sys.argv))
+
+    xmindparse(filename=ARGS.get('filename'),
+               format=ARGS.get('format'),
+               pretty=ARGS.get('pretty'))
+    exit(0)
