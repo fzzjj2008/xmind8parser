@@ -1,12 +1,15 @@
 # xmindparser
 
-parse xmind document in json/xml/yaml format
+`xmindparser`: parse xmind file in json/xml/yaml format
+
+`xmindgen`: generate generate xmind file from json/xml/yaml file
 
 ## Dependancy
 
 ```bash
 pip3 install xmind
 pip3 install dicttoxml
+pip3 install xmltodict
 pip3 install pyyaml
 ```
 
@@ -112,4 +115,10 @@ children:
   children:
   - name: subtopic 1
   - name: subtopic 2
+```
+
+- generate `test.xmind` from `test.json`
+
+```
+# ./xmindgen -f json test.json test.xmind
 ```
