@@ -1,8 +1,11 @@
 # xmindparser
 
-`xmindparser`: parse xmind file in json/xml/yaml format
+## Overview
 
-`xmindgen`: generate generate xmind file from json/xml/yaml file
+Project path: <https://github.com/fzzjj2008/xmindparser>
+
+- `xmindparser`: parse xmind file in json/xml/yaml format
+- `xmindgen`: generate generate xmind file from json/xml/yaml file
 
 ## Dependancy
 
